@@ -67,7 +67,7 @@ class Request(models.Model):
             request.META.get('X_REAL_IP', None),
             request.META.get('X_FORWARDED_FOR', None),
             ]
-        self.ip = next((item for item in ip_addr if item is not None), None)
+        self.ip = next((item for item in ip_addr if item is not None and item != ''), None)
         if self.ip is None or self.ip == '':
             self.ip = request_settings.IP_DUMMY
         # self.ip = request.META.get('REMOTE_ADDR', '')
