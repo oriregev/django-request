@@ -59,7 +59,20 @@ class Request(models.Model):
         self.is_ajax = request_is_ajax(request)
 
         # User information.
-        self.ip = request.META.get('REMOTE_ADDR', '')
+        ip_addr = [
+            request.META.get('REMOTE_ADDR', None),
+            request.META.get('HTTP_REMOTE_ADDR', None),
+            request.META.get('HTTP_X_REAL_IP', None),
+            request.META.get('HTTP_X_FORWARDED_FOR', None),
+            request.META.get('X_REAL_IP', None),
+            request.META.get('X_FORWARDED_FOR', None),
+            ]
+        self.ip = next((item for item in ip_addr if item is not None), None)
+        from django.core.validators import validate_ipv46_address
+        if self.ip is None or self.ip == '' or self.ip is not validate_ipv46_address(self.ip):
+            self.ip = request_settings.IP_DUMMY
+        # self.ip = request.META.get('REMOTE_ADDR', '')
+
         self.referer = request.META.get('HTTP_REFERER', '')[:255]
         self.user_agent = request.META.get('HTTP_USER_AGENT', '')[:255]
         self.language = request.META.get('HTTP_ACCEPT_LANGUAGE', '')[:255]
