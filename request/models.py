@@ -50,14 +50,6 @@ class Request(models.Model):
     def get_user(self):
         return get_user_model().objects.get(pk=self.user_id)
 
-    def is_valid_ip(self):
-        try:
-            from django.core.validators import validate_ipv46_address
-            validate_ipv46_address(self.ip)
-            return True
-        except Exception:
-            return False
-
     def from_http_request(self, request, response=None, commit=True):
         # Request information.
         self.method = request.method
@@ -76,7 +68,7 @@ class Request(models.Model):
             request.META.get('X_FORWARDED_FOR', None),
             ]
         self.ip = next((item for item in ip_addr if item is not None), None)
-        if self.ip is None or self.ip == '' or not self.is_valid_ip():
+        if self.ip is None or self.ip == '':
             self.ip = request_settings.IP_DUMMY
         # self.ip = request.META.get('REMOTE_ADDR', '')
 
